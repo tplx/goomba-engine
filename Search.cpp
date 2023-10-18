@@ -5,7 +5,6 @@
 #include <cmath>
 #include <utility>
 #include <algorithm>
-#include <unordered_map>
 #include <stdexcept>
 
 // Maximum depth for the search function
@@ -14,26 +13,17 @@ static constexpr int MAX_DEPTH = 99;
 // Minimum value for a move in the bound function
 static constexpr int MIN_MOVE_VALUE = 150;
 
-class Search {
-public:
-    std::pair<std::pair<int, int>, int> search(Position pos, int maxn = NODES_SEARCHED);
-    std::pair<int, int> parse(const std::string& sMove);
-
-private:
-    std::unordered_map<Position, Entry, std::hash<Position>> tp;
-    std::unordered_map<Position, std::pair<int, int>, std::hash<Position>> best_moves;
-    int nodes = 0;
-
-    int bound(Position pos, int gamma, int depth);
-};
-
 int Search::bound(Position pos, int gamma, int depth) {
     nodes += 1;
 
-    Entry initEntry = tp[pos];
-    if (initEntry.getDepth() != -1 && initEntry.getDepth() >= depth && 
-        (initEntry.getScore() < gamma || initEntry.getScore() >= gamma)) {
-        return initEntry.getScore();
+    Entry initEntry;
+    auto tpIter = tp.find(pos);
+    if (tpIter != tp.end()) {
+        initEntry = tpIter->second;
+        if (initEntry.getDepth() != -1 && initEntry.getDepth() >= depth && 
+            (initEntry.getScore() < gamma || initEntry.getScore() >= gamma)) {
+            return initEntry.getScore();
+        }
     }
 
     if (std::abs(pos.getScore()) >= MATE_VALUE) {
@@ -102,7 +92,10 @@ std::pair<std::pair<int, int>, int> Search::search(Position pos, int maxn) {
             score = bound(pos, gamma, depth);
             if (score >= gamma) {
                 lower = score;
-                best_move = best_moves[pos];             
+                auto bestMovesIter = best_moves.find(pos);
+                if (bestMovesIter != best_moves.end()) {
+                    best_move = bestMovesIter->second;
+                }
             }
             if (score < gamma) {
                 upper = score;

@@ -1,6 +1,8 @@
 # Goomba utils
 backup
 .vscode
+chess
+goomba
 
 # User-specific files
 *.suo

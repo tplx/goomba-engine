@@ -2,6 +2,7 @@
 #define RENDER_HPP
 
 #include <string>
+#include "Position.hpp"
 
 class Render {
 public:

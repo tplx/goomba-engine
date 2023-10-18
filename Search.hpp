@@ -3,7 +3,9 @@
 
 #include <utility>
 #include <string>
+#include <unordered_map>
 #include "Position.hpp"
+#include "Entry.hpp"
 
 class Search {
 public:

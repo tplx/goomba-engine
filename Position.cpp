@@ -7,8 +7,8 @@
 #include <cstring>
 
 Position::Position(const char board[120], int score, std::vector<bool> wCastle, std::vector<bool> bCastle, int ep, int kp)
-    : mScore(score), mCastleWhite(wCastle), mCastleBlack(bCastle), mEpSquare(ep), mKingPos(kp) {
-    std::copy(board, board + 120, mBoard.begin());
+        : mScore(score), mCastleWhite(wCastle), mCastleBlack(bCastle), mEpSquare(ep), mKingPos(kp) {
+        std::copy(board, board + 120, mBoard.begin());
 }
 
 // Rotate the board
@@ -23,11 +23,12 @@ Position Position::rotate() const
 std::vector<std::pair<int, int>> Position::genMoves() const {
     std::vector<std::pair<int, int>> moves;
     for (int i = 0; i < 120; i++) {
-        if (mBoard[i] == '.')
-            continue;
-        for (int j = 0; j < directions.at(mBoard[i]).size(); j++) {
+        char piece = toupper(mBoard[i]);
+        if (directions.count(piece) == 0) continue;
+        for (int j = 0; j < directions.at(piece).size(); j++) {
             for (int n = i;;) {
-                n += directions.at(mBoard[i]).at(j);
+                n += directions.at(piece).at(j);
+                if (n < 0 || n >= mBoard.size()) break;
                 if (mBoard[n] == '.')
                     moves.push_back(std::make_pair(i, n));
                 else {
@@ -35,7 +36,7 @@ std::vector<std::pair<int, int>> Position::genMoves() const {
                         moves.push_back(std::make_pair(i, n));
                     break;
                 }
-                if (mBoard[i] == 'P' || mBoard[i] == 'p' || mBoard[i] == 'N' || mBoard[i] == 'n')
+                if (toupper(mBoard[i]) == 'P' || toupper(mBoard[i]) == 'N')
                     break;
             }
         }
@@ -111,9 +112,16 @@ int Position::value(const std::pair<int, int> &move) const {
     int j = move.second;
     char p = mBoard[i];
     char q = mBoard[j];
-
+    int score = 0;
     // Actual move
-    int score = pst.at(std::toupper(p)).at(j) - pst.at(std::toupper(p)).at(i);
+    try {
+        if (i >= 0 && i < pst.at(std::toupper(p)).size() && j >= 0 && j < pst.at(std::toupper(p)).size()) {
+            score = pst.at(std::toupper(p)).at(j) - pst.at(std::toupper(p)).at(i);
+        }
+    } catch(const std::out_of_range& e) {
+        std::cerr << "Out of range error: " << e.what() << '\n';
+        std::cerr << "p: " << p << ", i: " << i << ", j: " << j << '\n';
+    }
 
     // Capture
     if( std::islower( q ) )
